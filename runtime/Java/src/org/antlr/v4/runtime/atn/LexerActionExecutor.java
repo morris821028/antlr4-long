@@ -103,7 +103,7 @@ public class LexerActionExecutor {
 	 * @return A {@link LexerActionExecutor} which stores input stream offsets
 	 * for all position-dependent lexer actions.
 	 */
-	public LexerActionExecutor fixOffsetBeforeMatch(int offset) {
+	public LexerActionExecutor fixOffsetBeforeMatch(long offset) {
 		LexerAction[] updatedLexerActions = null;
 		for (int i = 0; i < lexerActions.length; i++) {
 			if (lexerActions[i].isPositionDependent() && !(lexerActions[i] instanceof LexerIndexedCustomAction)) {
@@ -111,7 +111,7 @@ public class LexerActionExecutor {
 					updatedLexerActions = lexerActions.clone();
 				}
 
-				updatedLexerActions[i] = new LexerIndexedCustomAction(offset, lexerActions[i]);
+				updatedLexerActions[i] = new LexerIndexedCustomAction((int) offset, lexerActions[i]);
 			}
 		}
 
@@ -149,9 +149,9 @@ public class LexerActionExecutor {
 	 * {@link IntStream#seek} to set the {@code input} position to the beginning
 	 * of the token.
 	 */
-	public void execute(Lexer lexer, CharStream input, int startIndex) {
+	public void execute(Lexer lexer, CharStream input, long startIndex) {
 		boolean requiresSeek = false;
-		int stopIndex = input.index();
+		long stopIndex = input.index();
 		try {
 			for (LexerAction lexerAction : lexerActions) {
 				if (lexerAction instanceof LexerIndexedCustomAction) {

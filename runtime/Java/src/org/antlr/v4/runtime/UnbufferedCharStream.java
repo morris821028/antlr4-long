@@ -45,10 +45,12 @@ public class UnbufferedCharStream implements CharStream {
 	/**
 	 * 0..n-1 index into {@link #data data} of next character.
 	 *
-	 * <p>The {@code LA(1)} character is {@code data[p]}. If {@code p == n}, we are
-	 * out of buffered characters.</p>
+	 * <p>
+	 * The {@code LA(1)} character is {@code data[p]}. If {@code p == n}, we are out
+	 * of buffered characters.
+	 * </p>
 	 */
-   	protected int p=0;
+	protected int p = 0;
 
 	/**
 	 * Count up with {@link #mark mark()} and down with
@@ -144,8 +146,8 @@ public class UnbufferedCharStream implements CharStream {
 	 * {@code (p+1-1)==p} must be less than {@code data.length}.
 	 */
 	protected void sync(int want) {
-		int need = (p+want-1) - n + 1; // how many more elements we need?
-		if ( need > 0 ) {
+		int need = (p + want - 1) - n + 1; // how many more elements we need?
+		if (need > 0) {
 			fill(need);
 		}
 	}
@@ -267,7 +269,7 @@ public class UnbufferedCharStream implements CharStream {
     }
 
     @Override
-    public int index() {
+    public long index() {
 		return currentCharIndex;
     }
 
@@ -275,38 +277,36 @@ public class UnbufferedCharStream implements CharStream {
 	 *  sliding window.  Move {@code p} to {@code index-bufferStartIndex}.
 	 */
     @Override
-    public void seek(int index) {
+    public void seek(long index) {
 		if (index == currentCharIndex) {
 			return;
 		}
 
 		if (index > currentCharIndex) {
-			sync(index - currentCharIndex);
+			sync((int)(index - currentCharIndex));
 			index = Math.min(index, getBufferStartIndex() + n - 1);
 		}
 
-        // index == to bufferStartIndex should set p to 0
-        int i = index - getBufferStartIndex();
-        if ( i < 0 ) {
+		// index == to bufferStartIndex should set p to 0
+		long i = index - getBufferStartIndex();
+		if (i < 0) {
 			throw new IllegalArgumentException("cannot seek to negative index " + index);
+		} else if (i >= n) {
+			throw new UnsupportedOperationException("seek to index outside buffer: " + index + " not in "
+					+ getBufferStartIndex() + ".." + (getBufferStartIndex() + n));
 		}
-		else if (i >= n) {
-            throw new UnsupportedOperationException("seek to index outside buffer: "+
-                    index+" not in "+getBufferStartIndex()+".."+(getBufferStartIndex()+n));
-        }
 
-		p = i;
-		currentCharIndex = index;
+		p = (int) i;
+		currentCharIndex = (int) index;
 		if (p == 0) {
 			lastChar = lastCharBufferStart;
-		}
-		else {
-			lastChar = data[p-1];
+		} else {
+			lastChar = data[p - 1];
 		}
     }
 
     @Override
-    public int size() {
+    public long size() {
         throw new UnsupportedOperationException("Unbuffered stream cannot know its size");
     }
 
@@ -333,12 +333,12 @@ public class UnbufferedCharStream implements CharStream {
 		}
 
 		if (interval.a < bufferStartIndex || interval.b >= bufferStartIndex + n) {
-			throw new UnsupportedOperationException("interval "+interval+" outside buffer: "+
-			                    bufferStartIndex+".."+(bufferStartIndex+n-1));
+			throw new UnsupportedOperationException("interval " + interval + " outside buffer: " + bufferStartIndex
+					+ ".." + (bufferStartIndex + n - 1));
 		}
 		// convert from absolute to local index
-		int i = interval.a - bufferStartIndex;
-		return new String(data, i, interval.length());
+		int i = (int) (interval.a - bufferStartIndex);
+		return new String(data, i, (int) interval.length());
 	}
 
 	protected final int getBufferStartIndex() {

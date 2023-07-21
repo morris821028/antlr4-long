@@ -41,7 +41,7 @@ public interface TokenStream extends IntStream {
 	 * @throws UnsupportedOperationException if the stream does not support
 	 * retrieving the token at the specified index
 	 */
-	public Token get(int index);
+	public Token get(long index);
 
 	/**
 	 * Gets the underlying {@link TokenSource} which provides tokens for this

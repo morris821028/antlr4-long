@@ -165,7 +165,7 @@ public interface IntStream {
 	 * {@link IntStream initializing method} has occurred after this stream was
 	 * constructed.</p>
 	 */
-	int index();
+	long index();
 
 	/**
 	 * Set the input cursor to the position indicated by {@code index}. If the
@@ -195,7 +195,7 @@ public interface IntStream {
 	 * @throws UnsupportedOperationException if the stream does not support
 	 * seeking to the specified index
 	 */
-	void seek(int index);
+	void seek(long index);
 
 	/**
 	 * Returns the total number of symbols in the stream, including a single EOF
@@ -204,7 +204,7 @@ public interface IntStream {
 	 * @throws UnsupportedOperationException if the size of the stream is
 	 * unknown.
 	 */
-	int size();
+	long size();
 
 	/**
 	 * Gets the name of the underlying symbol source. This method returns a

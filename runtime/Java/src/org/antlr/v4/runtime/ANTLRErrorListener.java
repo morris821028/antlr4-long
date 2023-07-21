@@ -52,7 +52,7 @@ public interface ANTLRErrorListener {
 	public void syntaxError(Recognizer<?, ?> recognizer,
 							Object offendingSymbol,
 							int line,
-							int charPositionInLine,
+							long charPositionInLine,
 							String msg,
 							RecognitionException e);
 
@@ -98,8 +98,8 @@ public interface ANTLRErrorListener {
 	 */
 	void reportAmbiguity(Parser recognizer,
 						 DFA dfa,
-						 int startIndex,
-						 int stopIndex,
+						 long startIndex,
+						 long stopIndex,
 						 boolean exact,
 						 BitSet ambigAlts,
 						 ATNConfigSet configs);
@@ -129,8 +129,8 @@ public interface ANTLRErrorListener {
 	 */
 	void reportAttemptingFullContext(Parser recognizer,
 									 DFA dfa,
-									 int startIndex,
-									 int stopIndex,
+									 long startIndex,
+									 long stopIndex,
 									 BitSet conflictingAlts,
 									 ATNConfigSet configs);
 
@@ -174,8 +174,8 @@ public interface ANTLRErrorListener {
 	 */
 	void reportContextSensitivity(Parser recognizer,
 								  DFA dfa,
-								  int startIndex,
-								  int stopIndex,
+								  long startIndex,
+								  long stopIndex,
 								  int prediction,
 								  ATNConfigSet configs);
 }

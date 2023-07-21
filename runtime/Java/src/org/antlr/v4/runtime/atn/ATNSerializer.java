@@ -27,7 +27,7 @@ public class ATNSerializer {
 	private List<String> tokenNames;
 
 	private interface CodePointSerializer {
-		void serializeCodePoint(IntegerList data, int cp);
+		void serializeCodePoint(IntegerList data, long cp);
 	}
 
 	public ATNSerializer(ATN atn) {
@@ -178,8 +178,8 @@ public class ATNSerializer {
 			bmpSets,
 			new CodePointSerializer() {
 				@Override
-				public void serializeCodePoint(IntegerList data, int cp) {
-					data.add(cp);
+				public void serializeCodePoint(IntegerList data, long cp) {
+					data.add((int) cp);
 				}
 			});
 		serializeSets(
@@ -187,8 +187,8 @@ public class ATNSerializer {
 			smpSets,
 			new CodePointSerializer() {
 				@Override
-				public void serializeCodePoint(IntegerList data, int cp) {
-					serializeInt(data, cp);
+				public void serializeCodePoint(IntegerList data, long cp) {
+					serializeInt(data, (int) cp);
 				}
 			});
 		Map<IntervalSet, Integer> setIndices = new HashMap<>();

@@ -47,12 +47,12 @@ public class DecisionEventInfo {
 	 * The token index in the input stream at which the current prediction was
 	 * originally invoked.
 	 */
-	public final int startIndex;
+	public final long startIndex;
 
 	/**
 	 * The token index in the input stream at which the current event occurred.
 	 */
-	public final int stopIndex;
+	public final long stopIndex;
 
 	/**
 	 * {@code true} if the current event occurred during LL prediction;
@@ -62,7 +62,7 @@ public class DecisionEventInfo {
 
 	public DecisionEventInfo(int decision,
 							 ATNConfigSet configs,
-							 TokenStream input, int startIndex, int stopIndex,
+							 TokenStream input, long startIndex, long stopIndex,
 							 boolean fullCtx)
 	{
 		this.decision = decision;

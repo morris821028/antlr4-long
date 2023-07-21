@@ -73,7 +73,7 @@ public class ParserInterpreter extends Parser {
 	 *  parse trees. For now, we allow exactly one override.
 	 */
 	protected int overrideDecision = -1;
-	protected int overrideDecisionInputIndex = -1;
+	protected long overrideDecisionInputIndex = -1;
 	protected int overrideDecisionAlt = -1;
 	protected boolean overrideDecisionReached = false; // latch and only override once; error might trigger infinite loop
 
@@ -218,12 +218,12 @@ public class ParserInterpreter extends Parser {
 
 	protected void visitState(ATNState p) {
 //		System.out.println("visitState "+p.stateNumber);
-		int predictedAlt = 1;
+		long predictedAlt = 1;
 		if ( p instanceof DecisionState ) {
 			predictedAlt = visitDecisionState((DecisionState) p);
 		}
 
-		Transition transition = p.transition(predictedAlt - 1);
+		Transition transition = p.transition((int) (predictedAlt - 1));
 		switch (transition.getSerializationType()) {
 			case Transition.EPSILON:
 				if ( p.getStateType()==ATNState.STAR_LOOP_ENTRY &&
@@ -301,8 +301,8 @@ public class ParserInterpreter extends Parser {
 	 *  a decision state (instance of DecisionState). It gives an opportunity
 	 *  for subclasses to track interesting things.
 	 */
-	protected int visitDecisionState(DecisionState p) {
-		int predictedAlt = 1;
+	protected long visitDecisionState(DecisionState p) {
+		long predictedAlt = 1;
 		if ( p.getNumberOfTransitions()>1 ) {
 			getErrorHandler().sync(this);
 			int decision = p.decision;
@@ -385,7 +385,7 @@ public class ParserInterpreter extends Parser {
 	 *
 	 *  @since 4.5.1
 	 */
-	public void addDecisionOverride(int decision, int tokenIndex, int forcedAlt) {
+	public void addDecisionOverride(int decision, long tokenIndex, int forcedAlt) {
 		overrideDecision = decision;
 		overrideDecisionInputIndex = tokenIndex;
 		overrideDecisionAlt = forcedAlt;
@@ -400,7 +400,7 @@ public class ParserInterpreter extends Parser {
 	 *  tree.
 	 */
 	protected void recover(RecognitionException e) {
-		int i = _input.index();
+		long i = _input.index();
 		getErrorHandler().recover(this, e);
 		if ( _input.index()==i ) {
 			// no input consumed, better add an error node
@@ -409,25 +409,20 @@ public class ParserInterpreter extends Parser {
 				Token tok = e.getOffendingToken();
 				int expectedTokenType = Token.INVALID_TYPE;
 				if ( !ime.getExpectedTokens().isNil() ) {
-					expectedTokenType = ime.getExpectedTokens().getMinElement(); // get any element
+					expectedTokenType = (int) ime.getExpectedTokens().getMinElement(); // get any element
 				}
-				Token errToken =
-					getTokenFactory().create(new Pair<TokenSource, CharStream>(tok.getTokenSource(), tok.getTokenSource().getInputStream()),
-				                             expectedTokenType, tok.getText(),
-				                             Token.DEFAULT_CHANNEL,
-				                            -1, -1, // invalid start/stop
-				                             tok.getLine(), tok.getCharPositionInLine());
-				_ctx.addErrorNode(createErrorNode(_ctx,errToken));
-			}
-			else { // NoViableAlt
+				Token errToken = getTokenFactory().create(
+						new Pair<TokenSource, CharStream>(tok.getTokenSource(), tok.getTokenSource().getInputStream()),
+						expectedTokenType, tok.getText(), Token.DEFAULT_CHANNEL, -1, -1, // invalid start/stop
+						tok.getLine(), tok.getCharPositionInLine());
+				_ctx.addErrorNode(createErrorNode(_ctx, errToken));
+			} else { // NoViableAlt
 				Token tok = e.getOffendingToken();
-				Token errToken =
-					getTokenFactory().create(new Pair<TokenSource, CharStream>(tok.getTokenSource(), tok.getTokenSource().getInputStream()),
-				                             Token.INVALID_TYPE, tok.getText(),
-				                             Token.DEFAULT_CHANNEL,
-				                            -1, -1, // invalid start/stop
-				                             tok.getLine(), tok.getCharPositionInLine());
-				_ctx.addErrorNode(createErrorNode(_ctx,errToken));
+				Token errToken = getTokenFactory().create(
+						new Pair<TokenSource, CharStream>(tok.getTokenSource(), tok.getTokenSource().getInputStream()),
+						Token.INVALID_TYPE, tok.getText(), Token.DEFAULT_CHANNEL, -1, -1, // invalid start/stop
+						tok.getLine(), tok.getCharPositionInLine());
+				_ctx.addErrorNode(createErrorNode(_ctx, errToken));
 			}
 		}
 	}

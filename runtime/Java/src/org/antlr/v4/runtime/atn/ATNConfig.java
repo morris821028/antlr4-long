@@ -56,7 +56,7 @@ public class ATNConfig {
 	 * compares this value to 0 would be affected by the new purpose of the
 	 * flag. It also ensures the performance of the existing {@link ATNConfig}
 	 * constructors as well as certain operations like
-	 * {@link ATNConfigSet#add(ATNConfig, DoubleKeyMap)} method are
+	 * {@link ATNConfigSet#add(long, long)} method are
 	 * <em>completely</em> unaffected by the change.</p>
 	 */
 	public int reachesIntoOuterContext;

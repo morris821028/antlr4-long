@@ -101,14 +101,14 @@ public class XPath {
 			tokenStream.fill();
 		}
 		catch (LexerNoViableAltException e) {
-			int pos = lexer.getCharPositionInLine();
+			long pos = lexer.getCharPositionInLine();
 			String msg = "Invalid tokens or characters at index "+pos+" in path '"+path+"'";
 			throw new IllegalArgumentException(msg, e);
 		}
 
 		List<Token> tokens = tokenStream.getTokens();
 //		System.out.println("path="+path+"=>"+tokens);
-		List<XPathElement> elements = new ArrayList<XPathElement>();
+		List<XPathElement> elements = new ArrayList<>();
 		int n = tokens.size();
 		int i=0;
 loop:

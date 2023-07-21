@@ -150,21 +150,21 @@ public class XPathLexer extends Lexer {
 	}
 
 	@Override
-	public int getCharPositionInLine() {
+	public long getCharPositionInLine() {
 		return charPositionInLine;
 	}
 
 	public String matchID() {
-		int start = _input.index();
+		long start = _input.index();
 		consume(); // drop start char
-		while ( isNameChar(_input.LA(1)) ) {
+		while (isNameChar(_input.LA(1))) {
 			consume();
 		}
-		return _input.getText(Interval.of(start,_input.index()-1));
+		return _input.getText(Interval.of(start, _input.index() - 1));
 	}
 
 	public String matchString() {
-		int start = _input.index();
+		long start = _input.index();
 		consume(); // drop first quote
 		while ( _input.LA(1)!='\'' ) {
 			consume();

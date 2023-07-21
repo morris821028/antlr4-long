@@ -64,8 +64,8 @@ public class CommonTokenFactory implements TokenFactory<CommonToken> {
 
 	@Override
 	public CommonToken create(Pair<TokenSource, CharStream> source, int type, String text,
-							  int channel, int start, int stop,
-							  int line, int charPositionInLine)
+							  int channel, long start, long stop,
+							  int line, long charPositionInLine)
 	{
 		CommonToken t = new CommonToken(source, type, channel, start, stop);
 		t.setLine(line);

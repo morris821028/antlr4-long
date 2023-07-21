@@ -99,12 +99,12 @@ public abstract class CodePointCharStream implements CharStream {
 	}
 
 	@Override
-	public final int index() {
+	public final long index() {
 		return position;
 	}
 
 	@Override
-	public final int size() {
+	public final long size() {
 		return size;
 	}
 
@@ -119,8 +119,8 @@ public abstract class CodePointCharStream implements CharStream {
 	}
 
 	@Override
-	public final void seek(int index) {
-		position = index;
+	public final void seek(long index) {
+		position = (int) index;
 	}
 
 	@Override
@@ -151,8 +151,8 @@ public abstract class CodePointCharStream implements CharStream {
 		/** Return the UTF-16 encoded string for the given interval */
 		@Override
 		public String getText(Interval interval) {
-			int startIdx = Math.min(interval.a, size);
-			int len = Math.min(interval.b - interval.a + 1, size - startIdx);
+			int startIdx = Math.min((int) interval.a, size);
+			int len = Math.min((int) (interval.b - interval.a) + 1, size - startIdx);
 
 			// We know the maximum code point in byteArray is U+00FF,
 			// so we can treat this as if it were ISO-8859-1, aka Latin-1,
@@ -203,8 +203,8 @@ public abstract class CodePointCharStream implements CharStream {
 		/** Return the UTF-16 encoded string for the given interval */
 		@Override
 		public String getText(Interval interval) {
-			int startIdx = Math.min(interval.a, size);
-			int len = Math.min(interval.b - interval.a + 1, size - startIdx);
+			int startIdx = Math.min((int) interval.a, size);
+			int len = Math.min((int) (interval.b - interval.a) + 1, size - startIdx);
 
 			// We know there are no surrogates in this
 			// array, since otherwise we would be given a
@@ -258,8 +258,8 @@ public abstract class CodePointCharStream implements CharStream {
 		/** Return the UTF-16 encoded string for the given interval */
 		@Override
 		public String getText(Interval interval) {
-			int startIdx = Math.min(interval.a, size);
-			int len = Math.min(interval.b - interval.a + 1, size - startIdx);
+			int startIdx = Math.min((int) interval.a, size);
+			int len = Math.min((int) (interval.b - interval.a) + 1, size - startIdx);
 
 			// Note that we pass the int[] code points to the String constructor --
 			// this is supported, and the constructor will convert to UTF-16 internally.

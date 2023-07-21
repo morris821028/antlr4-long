@@ -13,9 +13,9 @@ public interface WritableToken extends Token {
 
 	public void setLine(int line);
 
-	public void setCharPositionInLine(int pos);
+	public void setCharPositionInLine(long pos);
 
 	public void setChannel(int channel);
 
-	public void setTokenIndex(int index);
+	public void setTokenIndex(long index);
 }

@@ -59,7 +59,7 @@ public class PredicateEvalInfo extends DecisionEventInfo {
 	 * @see SemanticContext#eval(Recognizer, RuleContext)
 	 */
 	public PredicateEvalInfo(int decision,
-							 TokenStream input, int startIndex, int stopIndex,
+							 TokenStream input, long startIndex, long stopIndex,
 							 SemanticContext semctx,
 							 boolean evalResult,
 							 int predictedAlt,

@@ -99,21 +99,23 @@ public class TokenStreamRewriter {
 		/** What index into rewrites List are we? */
 		protected int instructionIndex;
 		/** Token buffer index. */
-		protected int index;
+		protected long index;
 		protected Object text;
 
-		protected RewriteOperation(int index) {
+		protected RewriteOperation(long index) {
 			this.index = index;
 		}
 
-		protected RewriteOperation(int index, Object text) {
+		protected RewriteOperation(long index, Object text) {
 			this.index = index;
 			this.text = text;
 		}
-		/** Execute the rewrite operation by possibly adding to the buffer.
-		 *  Return the index of the next token to operate on.
+
+		/**
+		 * Execute the rewrite operation by possibly adding to the buffer. Return the
+		 * index of the next token to operate on.
 		 */
-		public int execute(StringBuilder buf) {
+		public long execute(StringBuilder buf) {
 			return index;
 		}
 
@@ -128,12 +130,12 @@ public class TokenStreamRewriter {
 	}
 
 	class InsertBeforeOp extends RewriteOperation {
-		public InsertBeforeOp(int index, Object text) {
+		public InsertBeforeOp(long index, Object text) {
 			super(index,text);
 		}
 
 		@Override
-		public int execute(StringBuilder buf) {
+		public long execute(StringBuilder buf) {
 			buf.append(text);
 			if ( tokens.get(index).getType()!=Token.EOF ) {
 				buf.append(tokens.get(index).getText());
@@ -146,36 +148,37 @@ public class TokenStreamRewriter {
 	 *  first and then the "insert befores" at same index. Implementation
 	 *  of "insert after" is "insert before index+1".
 	 */
-    class InsertAfterOp extends InsertBeforeOp {
-        public InsertAfterOp(int index, Object text) {
-            super(index+1, text); // insert after is insert before index+1
-        }
+	class InsertAfterOp extends InsertBeforeOp {
+		public InsertAfterOp(long index, Object text) {
+			super(index + 1, text); // insert after is insert before index+1
+		}
     }
 
 	/** I'm going to try replacing range from x..y with (y-x)+1 ReplaceOp
 	 *  instructions.
 	 */
 	class ReplaceOp extends RewriteOperation {
-		protected int lastIndex;
-		public ReplaceOp(int from, int to, Object text) {
-			super(from,text);
+		protected long lastIndex;
+
+		public ReplaceOp(long from, long to, Object text) {
+			super(from, text);
 			lastIndex = to;
 		}
+
 		@Override
-		public int execute(StringBuilder buf) {
-			if ( text!=null ) {
+		public long execute(StringBuilder buf) {
+			if (text != null) {
 				buf.append(text);
 			}
-			return lastIndex+1;
+			return lastIndex + 1;
 		}
+
 		@Override
 		public String toString() {
-			if ( text==null ) {
-				return "<DeleteOp@"+tokens.get(index)+
-						".."+tokens.get(lastIndex)+">";
+			if (text == null) {
+				return "<DeleteOp@" + tokens.get(index) + ".." + tokens.get(lastIndex) + ">";
 			}
-			return "<ReplaceOp@"+tokens.get(index)+
-					".."+tokens.get(lastIndex)+":\""+text+"\">";
+			return "<ReplaceOp@" + tokens.get(index) + ".." + tokens.get(lastIndex) + ":\"" + text + "\">";
 		}
 	}
 
@@ -236,15 +239,15 @@ public class TokenStreamRewriter {
 	}
 
 	public void insertAfter(String programName, Token t, Object text) {
-		insertAfter(programName,t.getTokenIndex(), text);
+		insertAfter(programName, t.getTokenIndex(), text);
 	}
 
-	public void insertAfter(String programName, int index, Object text) {
+	public void insertAfter(String programName, long index, Object text) {
 		// to insert after, just insert before next index (even if past end)
-        RewriteOperation op = new InsertAfterOp(index, text);
-        List<RewriteOperation> rewrites = getProgram(programName);
-        op.instructionIndex = rewrites.size();
-        rewrites.add(op);
+		RewriteOperation op = new InsertAfterOp(index, text);
+		List<RewriteOperation> rewrites = getProgram(programName);
+		op.instructionIndex = rewrites.size();
+		rewrites.add(op);
 	}
 
 	public void insertBefore(Token t, Object text) {
@@ -259,7 +262,7 @@ public class TokenStreamRewriter {
 		insertBefore(programName, t.getTokenIndex(), text);
 	}
 
-	public void insertBefore(String programName, int index, Object text) {
+	public void insertBefore(String programName, long index, Object text) {
 		RewriteOperation op = new InsertBeforeOp(index,text);
 		List<RewriteOperation> rewrites = getProgram(programName);
 		op.instructionIndex = rewrites.size();
@@ -270,7 +273,7 @@ public class TokenStreamRewriter {
 		replace(DEFAULT_PROGRAM_NAME, index, index, text);
 	}
 
-	public void replace(int from, int to, Object text) {
+	public void replace(long from, long to, Object text) {
 		replace(DEFAULT_PROGRAM_NAME, from, to, text);
 	}
 
@@ -282,9 +285,10 @@ public class TokenStreamRewriter {
 		replace(DEFAULT_PROGRAM_NAME, from, to, text);
 	}
 
-	public void replace(String programName, int from, int to, Object text) {
-		if ( from > to || from<0 || to<0 || to >= tokens.size() ) {
-			throw new IllegalArgumentException("replace: range invalid: "+from+".."+to+"(size="+tokens.size()+")");
+	public void replace(String programName, long from, long to, Object text) {
+		if (from > to || from < 0 || to < 0 || to >= tokens.size()) {
+			throw new IllegalArgumentException(
+					"replace: range invalid: " + from + ".." + to + "(size=" + tokens.size() + ")");
 		}
 		RewriteOperation op = new ReplaceOp(from, to, text);
 		List<RewriteOperation> rewrites = getProgram(programName);
@@ -382,33 +386,35 @@ public class TokenStreamRewriter {
 
 	public String getText(String programName, Interval interval) {
 		List<RewriteOperation> rewrites = programs.get(programName);
-		int start = interval.a;
-		int stop = interval.b;
+		long start = interval.a;
+		long stop = interval.b;
 
 		// ensure start/end are in range
-		if ( stop>tokens.size()-1 ) stop = tokens.size()-1;
-		if ( start<0 ) start = 0;
+		if (stop > tokens.size() - 1)
+			stop = tokens.size() - 1;
+		if (start < 0)
+			start = 0;
 
-		if ( rewrites==null || rewrites.isEmpty() ) {
+		if (rewrites == null || rewrites.isEmpty()) {
 			return tokens.getText(interval); // no instructions to execute
 		}
 		StringBuilder buf = new StringBuilder();
 
 		// First, optimize instruction stream
-		Map<Integer, RewriteOperation> indexToOp = reduceToSingleOperationPerIndex(rewrites);
+		Map<Long, RewriteOperation> indexToOp = reduceToSingleOperationPerIndex(rewrites);
 
 		// Walk buffer, executing instructions and emitting tokens
-		int i = start;
-		while ( i <= stop && i < tokens.size() ) {
+		long i = start;
+		while (i <= stop && i < tokens.size()) {
 			RewriteOperation op = indexToOp.get(i);
 			indexToOp.remove(i); // remove so any left have index size-1
 			Token t = tokens.get(i);
-			if ( op==null ) {
+			if (op == null) {
 				// no operation at that index, just dump token
-				if ( t.getType()!=Token.EOF ) buf.append(t.getText());
+				if (t.getType() != Token.EOF)
+					buf.append(t.getText());
 				i++; // move to next token
-			}
-			else {
+			} else {
 				i = op.execute(buf); // execute operation and skip
 			}
 		}
@@ -475,7 +481,7 @@ public class TokenStreamRewriter {
 	 *
 	 *  Return a map from token index to operation.
 	 */
-	protected Map<Integer, RewriteOperation> reduceToSingleOperationPerIndex(List<RewriteOperation> rewrites) {
+	protected Map<Long, RewriteOperation> reduceToSingleOperationPerIndex(List<RewriteOperation> rewrites) {
 //		System.out.println("rewrites="+rewrites);
 
 		// WALK REPLACES
@@ -561,16 +567,17 @@ public class TokenStreamRewriter {
 			}
 		}
 		// System.out.println("rewrites after="+rewrites);
-		Map<Integer, RewriteOperation> m = new HashMap<Integer, RewriteOperation>();
+		Map<Long, RewriteOperation> m = new HashMap<>();
 		for (int i = 0; i < rewrites.size(); i++) {
 			RewriteOperation op = rewrites.get(i);
-			if ( op==null ) continue; // ignore deleted ops
-			if ( m.get(op.index)!=null ) {
+			if (op == null)
+				continue; // ignore deleted ops
+			if (m.get(op.index) != null) {
 				throw new Error("should only be one op per index");
 			}
 			m.put(op.index, op);
 		}
-		//System.out.println("index to op: "+m);
+		// System.out.println("index to op: "+m);
 		return m;
 	}
 

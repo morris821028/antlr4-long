@@ -49,7 +49,7 @@ public class BufferedTokenStream implements TokenStream {
 	 * see the documentation of {@link IntStream} for a description of
 	 * Initializing Methods.</p>
 	 */
-    protected int p = -1;
+    protected long p = -1;
 
 	/**
 	 * Indicates whether the {@link Token#EOF} token has been fetched from
@@ -77,7 +77,7 @@ public class BufferedTokenStream implements TokenStream {
     public TokenSource getTokenSource() { return tokenSource; }
 
 	@Override
-	public int index() { return p; }
+	public long index() { return p; }
 
     @Override
     public int mark() {
@@ -102,13 +102,13 @@ public class BufferedTokenStream implements TokenStream {
     }
 
     @Override
-    public void seek(int index) {
+    public void seek(long index) {
         lazyInit();
         p = adjustSeekIndex(index);
     }
 
     @Override
-    public int size() { return tokens.size(); }
+    public long size() { return tokens.size(); }
 
     @Override
     public void consume() {
@@ -117,11 +117,11 @@ public class BufferedTokenStream implements TokenStream {
 			if (fetchedEOF) {
 				// the last token in tokens is EOF. skip check if p indexes any
 				// fetched token except the last.
-				skipEofCheck = p < tokens.size() - 1;
+				skipEofCheck = p < size() - 1;
 			}
 			else {
 				// no EOF token in tokens. skip check if p indexes a fetched token.
-				skipEofCheck = p < tokens.size();
+				skipEofCheck = p < size();
 			}
 		}
 		else {
@@ -142,14 +142,14 @@ public class BufferedTokenStream implements TokenStream {
 	 *
 	 * @return {@code true} if a token is located at index {@code i}, otherwise
 	 *    {@code false}.
-	 * @see #get(int i)
+	 * @see #get(long i)
 	 */
-    protected boolean sync(int i) {
+    protected boolean sync(long i) {
 		assert i >= 0;
-        int n = i - tokens.size() + 1; // how many more elements we need?
+        long n = i - tokens.size() + 1; // how many more elements we need?
         //System.out.println("sync("+i+") needs "+n);
         if ( n > 0 ) {
-			int fetched = fetch(n);
+			long fetched = fetch(n);
 			return fetched >= n;
 		}
 
@@ -160,15 +160,15 @@ public class BufferedTokenStream implements TokenStream {
 	 *
 	 * @return The actual number of elements added to the buffer.
 	 */
-    protected int fetch(int n) {
+    protected long fetch(long n) {
 		if (fetchedEOF) {
 			return 0;
 		}
 
-        for (int i = 0; i < n; i++) {
+        for (long i = 0; i < n; i++) {
             Token t = tokenSource.nextToken();
             if ( t instanceof WritableToken ) {
-                ((WritableToken)t).setTokenIndex(tokens.size());
+                ((WritableToken)t).setTokenIndex(size());
             }
             tokens.add(t);
             if ( t.getType()==Token.EOF ) {
@@ -181,18 +181,18 @@ public class BufferedTokenStream implements TokenStream {
     }
 
     @Override
-    public Token get(int i) {
+    public Token get(long i) {
         if ( i < 0 || i >= tokens.size() ) {
             throw new IndexOutOfBoundsException("token index "+i+" out of range 0.."+(tokens.size()-1));
         }
-        return tokens.get(i);
+        return tokens.get((int) i);
     }
 
 	/** Get all tokens from start..stop inclusively */
 	public List<Token> get(int start, int stop) {
 		if ( start<0 || stop<0 ) return null;
 		lazyInit();
-		List<Token> subset = new ArrayList<Token>();
+		List<Token> subset = new ArrayList<>();
 		if ( stop>=tokens.size() ) stop = tokens.size()-1;
 		for (int i = start; i <= stop; i++) {
 			Token t = tokens.get(i);
@@ -207,7 +207,7 @@ public class BufferedTokenStream implements TokenStream {
 
     protected Token LB(int k) {
         if ( (p-k)<0 ) return null;
-        return tokens.get(p-k);
+        return tokens.get((int)(p-k));
     }
 
 
@@ -217,14 +217,14 @@ public class BufferedTokenStream implements TokenStream {
         if ( k==0 ) return null;
         if ( k < 0 ) return LB(-k);
 
-		int i = p + k - 1;
+		long i = p + k - 1;
 		sync(i);
-        if ( i >= tokens.size() ) { // return EOF token
+        if ( i >= size() ) { // return EOF token
             // EOF must be last token
-            return tokens.get(tokens.size()-1);
+            return get(size()-1);
         }
 //		if ( i>range ) range = i;
-        return tokens.get(i);
+        return get(i);
     }
 
 	/**
@@ -240,7 +240,7 @@ public class BufferedTokenStream implements TokenStream {
 	 * @param i The target token index.
 	 * @return The adjusted target token index.
 	 */
-	protected int adjustSeekIndex(int i) {
+	protected long adjustSeekIndex(long i) {
 		return i;
 	}
 
@@ -309,13 +309,13 @@ public class BufferedTokenStream implements TokenStream {
 	 * the EOF token if there are no tokens on channel between {@code i} and
 	 * EOF.
 	 */
-	protected int nextTokenOnChannel(int i, int channel) {
+	protected long nextTokenOnChannel(long i, int channel) {
 		sync(i);
 		if (i >= size()) {
 			return size() - 1;
 		}
 
-		Token token = tokens.get(i);
+		Token token = get(i);
 		while ( token.getChannel()!=channel ) {
 			if ( token.getType()==Token.EOF ) {
 				return i;
@@ -323,7 +323,7 @@ public class BufferedTokenStream implements TokenStream {
 
 			i++;
 			sync(i);
-			token = tokens.get(i);
+			token = get(i);
 		}
 
 		return i;
@@ -339,7 +339,7 @@ public class BufferedTokenStream implements TokenStream {
 	 * index is returned. This is due to the fact that the EOF token is treated
 	 * as though it were on every channel.</p>
 	 */
-	protected int previousTokenOnChannel(int i, int channel) {
+	protected long previousTokenOnChannel(long i, int channel) {
 		sync(i);
 		if (i >= size()) {
 			// the EOF token is on every channel
@@ -347,7 +347,7 @@ public class BufferedTokenStream implements TokenStream {
 		}
 
 		while (i >= 0) {
-			Token token = tokens.get(i);
+			Token token = tokens.get((int)i);
 			if (token.getType() == Token.EOF || token.getChannel() == channel) {
 				return i;
 			}
@@ -362,16 +362,16 @@ public class BufferedTokenStream implements TokenStream {
 	 *  the current token up until we see a token on DEFAULT_TOKEN_CHANNEL or
 	 *  EOF. If channel is -1, find any non default channel token.
 	 */
-	public List<Token> getHiddenTokensToRight(int tokenIndex, int channel) {
+	public List<Token> getHiddenTokensToRight(long tokenIndex, int channel) {
 		lazyInit();
 		if ( tokenIndex<0 || tokenIndex>=tokens.size() ) {
 			throw new IndexOutOfBoundsException(tokenIndex+" not in 0.."+(tokens.size()-1));
 		}
 
-		int nextOnChannel =
+		long nextOnChannel =
 			nextTokenOnChannel(tokenIndex + 1, Lexer.DEFAULT_TOKEN_CHANNEL);
-		int to;
-		int from = tokenIndex+1;
+		long to;
+		long from = tokenIndex+1;
 		// if none onchannel to right, nextOnChannel=-1 so set to = last token
 		if ( nextOnChannel == -1 ) to = size()-1;
 		else to = nextOnChannel;
@@ -391,10 +391,10 @@ public class BufferedTokenStream implements TokenStream {
 	 *  the current token up until we see a token on DEFAULT_TOKEN_CHANNEL.
 	 *  If channel is -1, find any non default channel token.
 	 */
-	public List<Token> getHiddenTokensToLeft(int tokenIndex, int channel) {
+	public List<Token> getHiddenTokensToLeft(long tokenIndex, int channel) {
 		lazyInit();
-		if ( tokenIndex<0 || tokenIndex>=tokens.size() ) {
-			throw new IndexOutOfBoundsException(tokenIndex+" not in 0.."+(tokens.size()-1));
+		if (tokenIndex < 0 || tokenIndex >= tokens.size()) {
+			throw new IndexOutOfBoundsException(tokenIndex + " not in 0.." + (tokens.size() - 1));
 		}
 
 		if (tokenIndex == 0) {
@@ -402,12 +402,12 @@ public class BufferedTokenStream implements TokenStream {
 			return null;
 		}
 
-		int prevOnChannel =
-			previousTokenOnChannel(tokenIndex - 1, Lexer.DEFAULT_TOKEN_CHANNEL);
-		if ( prevOnChannel == tokenIndex - 1 ) return null;
+		long prevOnChannel = previousTokenOnChannel(tokenIndex - 1, Lexer.DEFAULT_TOKEN_CHANNEL);
+		if (prevOnChannel == tokenIndex - 1)
+			return null;
 		// if none onchannel to left, prevOnChannel=-1 then from=0
-		int from = prevOnChannel+1;
-		int to = tokenIndex-1;
+		long from = prevOnChannel + 1;
+		long to = tokenIndex - 1;
 
 		return filterForChannel(from, to, channel);
 	}
@@ -419,18 +419,20 @@ public class BufferedTokenStream implements TokenStream {
 		return getHiddenTokensToLeft(tokenIndex, -1);
 	}
 
-	protected List<Token> filterForChannel(int from, int to, int channel) {
-		List<Token> hidden = new ArrayList<Token>();
-		for (int i=from; i<=to; i++) {
-			Token t = tokens.get(i);
-			if ( channel==-1 ) {
-				if ( t.getChannel()!= Lexer.DEFAULT_TOKEN_CHANNEL ) hidden.add(t);
-			}
-			else {
-				if ( t.getChannel()==channel ) hidden.add(t);
+	protected List<Token> filterForChannel(long from, long to, int channel) {
+		List<Token> hidden = new ArrayList<>();
+		for (long i = from; i <= to; i++) {
+			Token t = get(i);
+			if (channel == -1) {
+				if (t.getChannel() != Lexer.DEFAULT_TOKEN_CHANNEL)
+					hidden.add(t);
+			} else {
+				if (t.getChannel() == channel)
+					hidden.add(t);
 			}
 		}
-		if ( hidden.size()==0 ) return null;
+		if (hidden.isEmpty())
+			return null;
 		return hidden;
 	}
 
@@ -441,21 +443,24 @@ public class BufferedTokenStream implements TokenStream {
 
 	@Override
 	public String getText() {
-		return getText(Interval.of(0,size()-1));
+		return getText(Interval.of(0, size() - 1));
 	}
 
 	@Override
 	public String getText(Interval interval) {
-		int start = interval.a;
-		int stop = interval.b;
-		if ( start<0 || stop<0 ) return "";
+		long start = interval.a;
+		long stop = interval.b;
+		if (start < 0 || stop < 0)
+			return "";
 		fill();
-        if ( stop>=tokens.size() ) stop = tokens.size()-1;
+		if (stop >= tokens.size())
+			stop = tokens.size() - 1;
 
 		StringBuilder buf = new StringBuilder();
-		for (int i = start; i <= stop; i++) {
-			Token t = tokens.get(i);
-			if ( t.getType()==Token.EOF ) break;
+		for (long i = start; i <= stop; i++) {
+			Token t = get(i);
+			if (t.getType() == Token.EOF)
+				break;
 			buf.append(t.getText());
 		}
 		return buf.toString();
@@ -482,7 +487,7 @@ public class BufferedTokenStream implements TokenStream {
         lazyInit();
 		final int blockSize = 1000;
 		while (true) {
-			int fetched = fetch(blockSize);
+			long fetched = fetch(blockSize);
 			if (fetched < blockSize) {
 				return;
 			}

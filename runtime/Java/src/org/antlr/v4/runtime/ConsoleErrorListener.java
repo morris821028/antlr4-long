@@ -31,7 +31,7 @@ public class ConsoleErrorListener extends BaseErrorListener {
 	public void syntaxError(Recognizer<?, ?> recognizer,
 							Object offendingSymbol,
 							int line,
-							int charPositionInLine,
+							long charPositionInLine,
 							String msg,
 							RecognitionException e)
 	{

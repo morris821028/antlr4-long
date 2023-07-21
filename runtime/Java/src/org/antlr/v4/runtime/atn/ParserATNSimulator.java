@@ -292,7 +292,7 @@ public class ParserATNSimulator extends ATNSimulator {
 
 	// LAME globals to avoid parameters!!!!! I need these down deep in predTransition
 	protected TokenStream _input;
-	protected int _startIndex;
+	protected long _startIndex;
 	protected ParserRuleContext _outerContext;
 	protected DFA _dfa;
 
@@ -342,7 +342,7 @@ public class ParserATNSimulator extends ATNSimulator {
 		_dfa = dfa;
 
 		int m = input.mark();
-		int index = _startIndex;
+		long index = _startIndex;
 
 		// Now we are certain to have a specific decision's DFA
 		// But, do we still need an initial state?
@@ -390,9 +390,9 @@ public class ParserATNSimulator extends ATNSimulator {
 				}
 			}
 
-			int alt = execATN(dfa, s0, input, index, outerContext);
+			long alt = execATN(dfa, s0, input, index, outerContext);
 			if ( debug ) System.out.println("DFA after predictATN: "+ dfa.toString(parser.getVocabulary()));
-			return alt;
+			return (int) alt;
 		}
 		finally {
 			mergeCache = null; // wack cache after each prediction
@@ -432,8 +432,8 @@ public class ParserATNSimulator extends ATNSimulator {
 	    conflict
 	    conflict + preds
 	 */
-	protected int execATN(DFA dfa, DFAState s0,
-					   TokenStream input, int startIndex,
+	protected long execATN(DFA dfa, DFAState s0,
+					   TokenStream input, long startIndex,
 					   ParserRuleContext outerContext)
 	{
 		if ( debug || debug_list_atn_decisions) {
@@ -466,7 +466,7 @@ public class ParserATNSimulator extends ATNSimulator {
 				// will get error no matter what.
 				NoViableAltException e = noViableAlt(input, outerContext, previousD.configs, startIndex);
 				input.seek(startIndex);
-				int alt = getSynValidOrSemInvalidAltThatFinishedDecisionEntryRule(previousD.configs, outerContext);
+				long alt = getSynValidOrSemInvalidAltThatFinishedDecisionEntryRule(previousD.configs, outerContext);
 				if ( alt!=ATN.INVALID_ALT_NUMBER ) {
 					return alt;
 				}
@@ -478,7 +478,7 @@ public class ParserATNSimulator extends ATNSimulator {
 				BitSet conflictingAlts = D.configs.conflictingAlts;
 				if ( D.predicates!=null ) {
 					if ( debug ) System.out.println("DFA state has preds in DFA sim LL failover");
-					int conflictIndex = input.index();
+					long conflictIndex = input.index();
 					if (conflictIndex != startIndex) {
 						input.seek(startIndex);
 					}
@@ -502,7 +502,7 @@ public class ParserATNSimulator extends ATNSimulator {
 					computeStartState(dfa.atnStartState, outerContext,
 									  fullCtx);
 				reportAttemptingFullContext(dfa, conflictingAlts, D.configs, startIndex, input.index());
-				int alt = execATNWithFullContext(dfa, D, s0_closure,
+				long alt = execATNWithFullContext(dfa, D, s0_closure,
 												 input, startIndex,
 												 outerContext);
 				return alt;
@@ -513,7 +513,7 @@ public class ParserATNSimulator extends ATNSimulator {
 					return D.prediction;
 				}
 
-				int stopIndex = input.index();
+				long stopIndex = input.index();
 				input.seek(startIndex);
 				BitSet alts = evalSemanticContext(D.predicates, outerContext, true);
 				switch (alts.cardinality()) {
@@ -641,10 +641,10 @@ public class ParserATNSimulator extends ATNSimulator {
 	}
 
 	// comes back with reach.uniqueAlt set to a valid alt
-	protected int execATNWithFullContext(DFA dfa,
+	protected long execATNWithFullContext(DFA dfa,
 										 DFAState D, // how far we got in SLL DFA before failing over
 										 ATNConfigSet s0,
-										 TokenStream input, int startIndex,
+										 TokenStream input, long startIndex,
 										 ParserRuleContext outerContext)
 	{
 		if ( debug || debug_list_atn_decisions ) {
@@ -674,7 +674,7 @@ public class ParserATNSimulator extends ATNSimulator {
 				// will get error no matter what.
 				NoViableAltException e = noViableAlt(input, outerContext, previous, startIndex);
 				input.seek(startIndex);
-				int alt = getSynValidOrSemInvalidAltThatFinishedDecisionEntryRule(previous, outerContext);
+				long alt = getSynValidOrSemInvalidAltThatFinishedDecisionEntryRule(previous, outerContext);
 				if ( alt!=ATN.INVALID_ALT_NUMBER ) {
 					return alt;
 				}
@@ -1294,28 +1294,26 @@ public class ParserATNSimulator extends ATNSimulator {
 	 * {@link ATN#INVALID_ALT_NUMBER} if a suitable alternative was not
 	 * identified and {@link #adaptivePredict} should report an error instead.
 	 */
-	protected int getSynValidOrSemInvalidAltThatFinishedDecisionEntryRule(ATNConfigSet configs,
-																		  ParserRuleContext outerContext)
-	{
-		Pair<ATNConfigSet,ATNConfigSet> sets =
-			splitAccordingToSemanticValidity(configs, outerContext);
+	protected long getSynValidOrSemInvalidAltThatFinishedDecisionEntryRule(ATNConfigSet configs,
+			ParserRuleContext outerContext) {
+		Pair<ATNConfigSet, ATNConfigSet> sets = splitAccordingToSemanticValidity(configs, outerContext);
 		ATNConfigSet semValidConfigs = sets.a;
 		ATNConfigSet semInvalidConfigs = sets.b;
-		int alt = getAltThatFinishedDecisionEntryRule(semValidConfigs);
-		if ( alt!=ATN.INVALID_ALT_NUMBER ) { // semantically/syntactically viable path exists
+		long alt = getAltThatFinishedDecisionEntryRule(semValidConfigs);
+		if (alt != ATN.INVALID_ALT_NUMBER) { // semantically/syntactically viable path exists
 			return alt;
 		}
 		// Is there a syntactically valid path with a failed pred?
-		if ( semInvalidConfigs.size()>0 ) {
+		if (semInvalidConfigs.size() > 0) {
 			alt = getAltThatFinishedDecisionEntryRule(semInvalidConfigs);
-			if ( alt!=ATN.INVALID_ALT_NUMBER ) { // syntactically viable path exists
+			if (alt != ATN.INVALID_ALT_NUMBER) { // syntactically viable path exists
 				return alt;
 			}
 		}
 		return ATN.INVALID_ALT_NUMBER;
 	}
 
-	protected int getAltThatFinishedDecisionEntryRule(ATNConfigSet configs) {
+	protected long getAltThatFinishedDecisionEntryRule(ATNConfigSet configs) {
 		IntervalSet alts = new IntervalSet();
 		for (ATNConfig c : configs) {
 			if ( c.getOuterContextDepth()>0 || (c.state instanceof RuleStopState && c.context.hasEmptyPath()) ) {
@@ -1829,7 +1827,7 @@ public class ParserATNSimulator extends ATNSimulator {
 				// during closure, which dramatically reduces the size of
 				// the config sets. It also obviates the need to test predicates
 				// later during conflict resolution.
-				int currentPosition = _input.index();
+				long currentPosition = _input.index();
 				_input.seek(_startIndex);
 				boolean predSucceeds = evalSemanticContext(pt.getPredicate(), _outerContext, config.alt, fullCtx);
 				_input.seek(currentPosition);
@@ -1877,7 +1875,7 @@ public class ParserATNSimulator extends ATNSimulator {
 				// during closure, which dramatically reduces the size of
 				// the config sets. It also obviates the need to test predicates
 				// later during conflict resolution.
-				int currentPosition = _input.index();
+				long currentPosition = _input.index();
 				_input.seek(_startIndex);
 				boolean predSucceeds = evalSemanticContext(pt.getPredicate(), _outerContext, config.alt, fullCtx);
 				_input.seek(currentPosition);
@@ -2021,7 +2019,7 @@ public class ParserATNSimulator extends ATNSimulator {
 	protected NoViableAltException noViableAlt(TokenStream input,
 											ParserRuleContext outerContext,
 											ATNConfigSet configs,
-											int startIndex)
+											long startIndex)
 	{
 		return new NoViableAltException(parser, input,
 											input.get(startIndex),
@@ -2130,7 +2128,7 @@ public class ParserATNSimulator extends ATNSimulator {
 		}
 	}
 
-	protected void reportAttemptingFullContext(DFA dfa, BitSet conflictingAlts, ATNConfigSet configs, int startIndex, int stopIndex) {
+	protected void reportAttemptingFullContext(DFA dfa, BitSet conflictingAlts, ATNConfigSet configs, long startIndex, long stopIndex) {
         if ( debug || retry_debug ) {
 			Interval interval = Interval.of(startIndex, stopIndex);
 			System.out.println("reportAttemptingFullContext decision="+dfa.decision+":"+configs+
@@ -2139,7 +2137,7 @@ public class ParserATNSimulator extends ATNSimulator {
         if ( parser!=null ) parser.getErrorListenerDispatch().reportAttemptingFullContext(parser, dfa, startIndex, stopIndex, conflictingAlts, configs);
     }
 
-	protected void reportContextSensitivity(DFA dfa, int prediction, ATNConfigSet configs, int startIndex, int stopIndex) {
+	protected void reportContextSensitivity(DFA dfa, int prediction, ATNConfigSet configs, long startIndex, long stopIndex) {
         if ( debug || retry_debug ) {
 			Interval interval = Interval.of(startIndex, stopIndex);
             System.out.println("reportContextSensitivity decision="+dfa.decision+":"+configs+
@@ -2151,7 +2149,7 @@ public class ParserATNSimulator extends ATNSimulator {
     /** If context sensitive parsing, we know it's ambiguity not conflict */
     protected void reportAmbiguity(DFA dfa,
 								   DFAState D, // the DFA state from execATN() that had SLL conflicts
-								   int startIndex, int stopIndex,
+								   long startIndex, long stopIndex,
 								   boolean exact,
 								   BitSet ambigAlts,
 								   ATNConfigSet configs) // configs that LL not SLL considered conflicting

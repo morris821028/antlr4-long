@@ -88,14 +88,12 @@ public class ListTokenSource implements TokenSource {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public int getCharPositionInLine() {
+	public long getCharPositionInLine() {
 		if (i < tokens.size()) {
 			return tokens.get(i).getCharPositionInLine();
-		}
-		else if (eofToken != null) {
+		} else if (eofToken != null) {
 			return eofToken.getCharPositionInLine();
-		}
-		else if (tokens.size() > 0) {
+		} else if (!tokens.isEmpty()) {
 			// have to calculate the result from the line/column of the previous
 			// token, along with the text of the token.
 			Token lastToken = tokens.get(tokens.size() - 1);
@@ -122,16 +120,17 @@ public class ListTokenSource implements TokenSource {
 	public Token nextToken() {
 		if (i >= tokens.size()) {
 			if (eofToken == null) {
-				int start = -1;
-				if (tokens.size() > 0) {
-					int previousStop = tokens.get(tokens.size() - 1).getStopIndex();
+				long start = -1;
+				if (!tokens.isEmpty()) {
+					long previousStop = tokens.get(tokens.size() - 1).getStopIndex();
 					if (previousStop != -1) {
 						start = previousStop + 1;
 					}
 				}
 
-				int stop = Math.max(-1, start - 1);
-				eofToken = _factory.create(new Pair<TokenSource, CharStream>(this, getInputStream()), Token.EOF, "EOF", Token.DEFAULT_CHANNEL, start, stop, getLine(), getCharPositionInLine());
+				long stop = Math.max(-1, start - 1);
+				eofToken = _factory.create(new Pair<TokenSource, CharStream>(this, getInputStream()), Token.EOF, "EOF",
+						Token.DEFAULT_CHANNEL, start, stop, getLine(), getCharPositionInLine());
 			}
 
 			return eofToken;

@@ -45,7 +45,7 @@ public interface TokenSource {
 	 * @return The line number for the current position in the input stream, or
 	 * -1 if the current token source does not track character positions.
 	 */
-	public int getCharPositionInLine();
+	public long getCharPositionInLine();
 
 	/**
 	 * Get the {@link CharStream} from which this token source is currently

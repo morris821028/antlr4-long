@@ -41,7 +41,7 @@ public class LexerATNSimulator extends ATNSimulator {
 	 *  can simply return the predicted token type.</p>
 	 */
 	protected static class SimState {
-		protected int index = -1;
+		protected long index = -1;
 		protected int line = 0;
 		protected int charPos = -1;
 		protected DFAState dfaState;
@@ -62,7 +62,7 @@ public class LexerATNSimulator extends ATNSimulator {
 	 *  DFA did not have a previous accept state. In this case, we use the
 	 *  ATN-generated exception object.
 	 */
-	protected int startIndex = -1;
+	protected long startIndex = -1;
 
 	/** line number 1..n within the input */
 	protected int line = 1;
@@ -354,7 +354,7 @@ public class LexerATNSimulator extends ATNSimulator {
 	}
 
 	protected void accept(CharStream input, LexerActionExecutor lexerActionExecutor,
-						  int startIndex, int index, int line, int charPos)
+						  long startIndex, long index, int line, int charPos)
 	{
 		if ( debug ) {
 			System.out.format(Locale.getDefault(), "ACTION %s\n", lexerActionExecutor);
@@ -589,7 +589,7 @@ public class LexerATNSimulator extends ATNSimulator {
 
 		int savedCharPositionInLine = charPositionInLine;
 		int savedLine = line;
-		int index = input.index();
+		long index = input.index();
 		int marker = input.mark();
 		try {
 			consume(input);

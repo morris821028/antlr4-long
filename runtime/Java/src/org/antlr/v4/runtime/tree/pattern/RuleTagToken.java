@@ -139,7 +139,7 @@ public class RuleTagToken implements Token {
 	 * <p>The implementation for {@link RuleTagToken} always returns -1.</p>
 	 */
 	@Override
-	public int getCharPositionInLine() {
+	public long getCharPositionInLine() {
 		return -1;
 	}
 
@@ -149,7 +149,7 @@ public class RuleTagToken implements Token {
 	 * <p>The implementation for {@link RuleTagToken} always returns -1.</p>
 	 */
 	@Override
-	public int getTokenIndex() {
+	public long getTokenIndex() {
 		return -1;
 	}
 
@@ -159,7 +159,7 @@ public class RuleTagToken implements Token {
 	 * <p>The implementation for {@link RuleTagToken} always returns -1.</p>
 	 */
 	@Override
-	public int getStartIndex() {
+	public long getStartIndex() {
 		return -1;
 	}
 
@@ -169,7 +169,7 @@ public class RuleTagToken implements Token {
 	 * <p>The implementation for {@link RuleTagToken} always returns -1.</p>
 	 */
 	@Override
-	public int getStopIndex() {
+	public long getStopIndex() {
 		return -1;
 	}
 

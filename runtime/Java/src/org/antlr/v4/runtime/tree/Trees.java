@@ -195,8 +195,8 @@ public class Trees {
 	 *  @since 4.5.1
 	 */
 	public static ParserRuleContext getRootOfSubtreeEnclosingRegion(ParseTree t,
-																	int startTokenIndex, // inclusive
-																	int stopTokenIndex)  // inclusive
+																	long startTokenIndex, // inclusive
+																	long stopTokenIndex)  // inclusive
 	{
 		int n = t.getChildCount();
 		for (int i = 0; i<n; i++) {
@@ -226,8 +226,8 @@ public class Trees {
 	 */
 	public static void stripChildrenOutOfRange(ParserRuleContext t,
 											   ParserRuleContext root,
-											   int startIndex,
-											   int stopIndex)
+											   long startIndex,
+											   long stopIndex)
 	{
 		if ( t==null ) return;
 		for (int i = 0; i < t.getChildCount(); i++) {

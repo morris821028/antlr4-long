@@ -32,7 +32,7 @@ public class DefaultErrorStrategy implements ANTLRErrorStrategy {
 	 *  ad nauseum.  This is a failsafe mechanism to guarantee that at least
 	 *  one token/tree node is consumed for two errors.
 	 */
-	protected int lastErrorIndex = -1;
+	protected long lastErrorIndex = -1;
 
 	protected IntervalSet lastErrorStates;
 
@@ -584,15 +584,17 @@ public class DefaultErrorStrategy implements ANTLRErrorStrategy {
 		Token currentSymbol = recognizer.getCurrentToken();
 		IntervalSet expecting = getExpectedTokens(recognizer);
 		int expectedTokenType = Token.INVALID_TYPE;
-		if ( !expecting.isNil() ) {
-			expectedTokenType = expecting.getMinElement(); // get any element
+		if (!expecting.isNil()) {
+			expectedTokenType = (int) expecting.getMinElement(); // get any element
 		}
 		String tokenText;
-		if ( expectedTokenType== Token.EOF ) tokenText = "<missing EOF>";
-		else tokenText = "<missing "+recognizer.getVocabulary().getDisplayName(expectedTokenType)+">";
+		if (expectedTokenType == Token.EOF)
+			tokenText = "<missing EOF>";
+		else
+			tokenText = "<missing " + recognizer.getVocabulary().getDisplayName(expectedTokenType) + ">";
 		Token current = currentSymbol;
 		Token lookback = recognizer.getInputStream().LT(-1);
-		if ( current.getType() == Token.EOF && lookback!=null ) {
+		if (current.getType() == Token.EOF && lookback != null) {
 			current = lookback;
 		}
 		return

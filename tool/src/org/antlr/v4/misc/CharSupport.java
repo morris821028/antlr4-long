@@ -189,7 +189,7 @@ public class CharSupport {
 		Iterator<Interval> iter = intervalSet.getIntervals().iterator();
 		while (iter.hasNext()) {
 			Interval interval = iter.next();
-			buf.append(getRangeEscapedString(interval.a, interval.b));
+			buf.append(getRangeEscapedString((int) interval.a, (int) interval.b));
 			if (iter.hasNext()) {
 				buf.append(" | ");
 			}

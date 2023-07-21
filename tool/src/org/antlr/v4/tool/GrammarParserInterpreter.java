@@ -159,8 +159,8 @@ public class GrammarParserInterpreter extends ParserInterpreter {
 	 *  getRecursiveOpAlts().
 	 */
 	@Override
-	protected int visitDecisionState(DecisionState p) {
-		int predictedAlt = super.visitDecisionState(p);
+	protected long visitDecisionState(DecisionState p) {
+		long predictedAlt = super.visitDecisionState(p);
 		if( p.getNumberOfTransitions() > 1) {
 //			System.out.println("decision "+p.decision+": "+predictedAlt);
 			if( p.decision == this.overrideDecision &&
@@ -170,15 +170,15 @@ public class GrammarParserInterpreter extends ParserInterpreter {
 			}
 		}
 
-		GrammarInterpreterRuleContext ctx = (GrammarInterpreterRuleContext)_ctx;
-		if ( decisionStatesThatSetOuterAltNumInContext.get(p.stateNumber) ) {
-			ctx.outerAltNum = predictedAlt;
+		GrammarInterpreterRuleContext ctx = (GrammarInterpreterRuleContext) _ctx;
+		if (decisionStatesThatSetOuterAltNumInContext.get(p.stateNumber)) {
+			ctx.outerAltNum = (int) predictedAlt;
 			Rule r = g.getRule(p.ruleIndex);
-			if ( atn.ruleToStartState[r.index].isLeftRecursiveRule ) {
+			if (atn.ruleToStartState[r.index].isLeftRecursiveRule) {
 				int[] alts = stateToAltsMap[p.stateNumber];
 				LeftRecursiveRule lr = (LeftRecursiveRule) g.getRule(p.ruleIndex);
 				if (p.getStateType() == ATNState.BLOCK_START) {
-					if ( alts==null ) {
+					if (alts == null) {
 						alts = lr.getPrimaryAlts();
 						stateToAltsMap[p.stateNumber] = alts; // cache it
 					}
@@ -189,7 +189,7 @@ public class GrammarParserInterpreter extends ParserInterpreter {
 						stateToAltsMap[p.stateNumber] = alts; // cache it
 					}
 				}
-				ctx.outerAltNum = alts[predictedAlt];
+				ctx.outerAltNum = alts[(int)predictedAlt];
 			}
 		}
 
@@ -273,8 +273,8 @@ public class GrammarParserInterpreter extends ParserInterpreter {
 	                                                               TokenStream tokens,
 	                                                               int decision,
 	                                                               BitSet alts,
-	                                                               int startIndex,
-	                                                               int stopIndex,
+	                                                               long startIndex,
+	                                                               long stopIndex,
 	                                                               int startRuleIndex)
 		throws RecognitionException {
 		List<ParserRuleContext> trees = new ArrayList<ParserRuleContext>();
@@ -339,8 +339,8 @@ public class GrammarParserInterpreter extends ParserInterpreter {
 	                                                             TokenStream tokens,
 	                                                             int startRuleIndex,
 	                                                             int decision,
-	                                                             int startIndex,
-	                                                             int stopIndex) {
+	                                                             long startIndex,
+	                                                             long stopIndex) {
 		List<ParserRuleContext> trees = new ArrayList<ParserRuleContext>();
 		// Create a new parser interpreter to parse the ambiguous subphrase
 		ParserInterpreter parser = deriveTempParserInterpreter(g, originalParser, tokens);
@@ -357,7 +357,7 @@ public class GrammarParserInterpreter extends ParserInterpreter {
 			parser.reset();
 			parser.addDecisionOverride(decision, startIndex, alt);
 			ParserRuleContext tt = parser.parse(startRuleIndex);
-			int stopTreeAt = stopIndex;
+			long stopTreeAt = stopIndex;
 			if ( errorHandler.firstErrorTokenIndex>=0 ) {
 				stopTreeAt = errorHandler.firstErrorTokenIndex; // cut off rest at first error
 			}
@@ -428,10 +428,10 @@ public class GrammarParserInterpreter extends ParserInterpreter {
 	 *  recovery in line, we throw InputMismatchException to engage recover().
 	 */
 	public static class BailButConsumeErrorStrategy extends DefaultErrorStrategy {
-		public int firstErrorTokenIndex = -1;
+		public long firstErrorTokenIndex = -1;
 		@Override
 		public void recover(Parser recognizer, RecognitionException e) {
-			int errIndex = recognizer.getInputStream().index();
+			long errIndex = recognizer.getInputStream().index();
 			if ( firstErrorTokenIndex == -1 ) {
 				firstErrorTokenIndex = errIndex; // latch
 			}
@@ -444,7 +444,7 @@ public class GrammarParserInterpreter extends ParserInterpreter {
 
 		@Override
 		public Token recoverInline(Parser recognizer) throws RecognitionException {
-			int errIndex = recognizer.getInputStream().index();
+			long errIndex = recognizer.getInputStream().index();
 			if ( firstErrorTokenIndex == -1 ) {
 				firstErrorTokenIndex = errIndex; // latch
 			}

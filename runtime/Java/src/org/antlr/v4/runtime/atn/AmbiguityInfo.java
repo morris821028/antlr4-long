@@ -64,7 +64,7 @@ public class AmbiguityInfo extends DecisionEventInfo {
 	public AmbiguityInfo(int decision,
 						 ATNConfigSet configs,
 						 BitSet ambigAlts,
-						 TokenStream input, int startIndex, int stopIndex,
+						 TokenStream input, long startIndex, long stopIndex,
 						 boolean fullCtx)
 	{
 		super(decision, configs, input, startIndex, stopIndex, fullCtx);

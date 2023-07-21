@@ -66,7 +66,7 @@ public class CommonTokenStream extends BufferedTokenStream {
     }
 
 	@Override
-	protected int adjustSeekIndex(int i) {
+	protected long adjustSeekIndex(long i) {
 		return nextTokenOnChannel(i, channel);
 	}
 
@@ -74,7 +74,7 @@ public class CommonTokenStream extends BufferedTokenStream {
     protected Token LB(int k) {
         if ( k==0 || (p-k)<0 ) return null;
 
-        int i = p;
+        long i = p;
         int n = 1;
         // find k good tokens looking backwards
         while ( n<=k && i>0 ) {
@@ -83,7 +83,7 @@ public class CommonTokenStream extends BufferedTokenStream {
             n++;
         }
         if ( i<0 ) return null;
-        return tokens.get(i);
+        return get(i);
     }
 
     @Override
@@ -92,7 +92,7 @@ public class CommonTokenStream extends BufferedTokenStream {
         lazyInit();
         if ( k == 0 ) return null;
         if ( k < 0 ) return LB(-k);
-        int i = p;
+        long i = p;
         int n = 1; // we know tokens[p] is a good one
         // find k good tokens
         while ( n<k ) {
@@ -103,7 +103,7 @@ public class CommonTokenStream extends BufferedTokenStream {
             n++;
         }
 //		if ( i>range ) range = i;
-        return tokens.get(i);
+        return get(i);
     }
 
 	/** Count EOF just once. */

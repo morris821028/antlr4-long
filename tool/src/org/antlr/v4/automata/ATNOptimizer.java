@@ -91,20 +91,20 @@ public class ATNOptimizer {
 					continue;
 				}
 
-				ATNState blockEndState = decision.transition(interval.a).target.transition(0).target;
+				ATNState blockEndState = decision.transition((int) interval.a).target.transition(0).target;
 				IntervalSet matchSet = new IntervalSet();
-				for (int j = interval.a; j <= interval.b; j++) {
-					Transition matchTransition = decision.transition(j).target.transition(0);
+				for (long j = interval.a; j <= interval.b; j++) {
+					Transition matchTransition = decision.transition((int) j).target.transition(0);
 					if (matchTransition instanceof NotSetTransition) {
 						throw new UnsupportedOperationException("Not yet implemented.");
 					}
-					IntervalSet set =  matchTransition.label();
+					IntervalSet set = matchTransition.label();
 					List<Interval> intervals = set.getIntervals();
 					int n = intervals.size();
 					for (int k = 0; k < n; k++) {
 						Interval setInterval = intervals.get(k);
-						int a = setInterval.a;
-						int b = setInterval.b;
+						int a = (int) setInterval.a;
+						int b = (int) setInterval.b;
 						if (a != -1 && b != -1) {
 							for (int v = a; v <= b; v++) {
 								if (matchSet.contains(v)) {
@@ -124,20 +124,20 @@ public class ATNOptimizer {
 				Transition newTransition;
 				if (matchSet.getIntervals().size() == 1) {
 					if (matchSet.size() == 1) {
-						newTransition = CodePointTransitions.createWithCodePoint(blockEndState, matchSet.getMinElement());
-					}
-					else {
+						newTransition = CodePointTransitions.createWithCodePoint(blockEndState,
+								(int) matchSet.getMinElement());
+					} else {
 						Interval matchInterval = matchSet.getIntervals().get(0);
-						newTransition = CodePointTransitions.createWithCodePointRange(blockEndState, matchInterval.a, matchInterval.b);
+						newTransition = CodePointTransitions.createWithCodePointRange(blockEndState,
+								(int) matchInterval.a, (int) matchInterval.b);
 					}
-				}
-				else {
+				} else {
 					newTransition = new SetTransition(blockEndState, matchSet);
 				}
 
-				decision.transition(interval.a).target.setTransition(0, newTransition);
-				for (int j = interval.a + 1; j <= interval.b; j++) {
-					Transition removed = decision.removeTransition(interval.a + 1);
+				decision.transition((int) interval.a).target.setTransition(0, newTransition);
+				for (int j = (int) interval.a + 1; j <= interval.b; j++) {
+					Transition removed = decision.removeTransition((int) interval.a + 1);
 					atn.removeState(removed.target);
 					removedStates++;
 				}

@@ -62,7 +62,7 @@ public interface Token {
 	/** The index of the first character of this token relative to the
 	 *  beginning of the line at which it occurs, 0..n-1
 	 */
-	int getCharPositionInLine();
+	long getCharPositionInLine();
 
 	/** Return the channel this token. Each token can arrive at the parser
 	 *  on a different channel, but the parser only "tunes" to a single channel.
@@ -77,17 +77,17 @@ public interface Token {
 	 *  Return -1 to indicate that this token was conjured up since
 	 *  it doesn't have a valid index.
 	 */
-	int getTokenIndex();
+	long getTokenIndex();
 
 	/** The starting character index of the token
 	 *  This method is optional; return -1 if not implemented.
 	 */
-	int getStartIndex();
+	long getStartIndex();
 
 	/** The last character index of the token.
 	 *  This method is optional; return -1 if not implemented.
 	 */
-	int getStopIndex();
+	long getStopIndex();
 
 	/** Gets the {@link TokenSource} which created this token.
 	 */

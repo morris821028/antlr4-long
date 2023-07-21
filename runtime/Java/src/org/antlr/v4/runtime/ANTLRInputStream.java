@@ -166,12 +166,12 @@ public class ANTLRInputStream implements CharStream {
 	 *  be returned from LA(1).
      */
     @Override
-    public int index() {
+    public long index() {
         return p;
     }
 
 	@Override
-	public int size() {
+	public long size() {
 		return n;
 	}
 
@@ -189,29 +189,31 @@ public class ANTLRInputStream implements CharStream {
 	 *  update line and charPositionInLine. If we seek backwards, just set p
 	 */
 	@Override
-	public void seek(int index) {
-		if ( index<=p ) {
-			p = index; // just jump; don't update stream state (line, ...)
+	public void seek(long index) {
+		if (index <= p) {
+			p = (int) index; // just jump; don't update stream state (line, ...)
 			return;
 		}
 		// seek forward, consume until p hits index or n (whichever comes first)
 		index = Math.min(index, n);
-		while ( p<index ) {
+		while (p < index) {
 			consume();
 		}
 	}
 
 	@Override
 	public String getText(Interval interval) {
-		int start = interval.a;
-		int stop = interval.b;
-		if ( stop >= n ) stop = n-1;
-		int count = stop - start + 1;
-		if ( start >= n ) return "";
+		long start = interval.a;
+		long stop = interval.b;
+		if (stop >= n)
+			stop = n - 1;
+		int count = (int) (stop - start) + 1;
+		if (start >= n)
+			return "";
 //		System.err.println("data: "+Arrays.toString(data)+", n="+n+
 //						   ", start="+start+
 //						   ", stop="+stop);
-		return new String(data, start, count);
+		return new String(data, (int) start, count);
 	}
 
 	@Override

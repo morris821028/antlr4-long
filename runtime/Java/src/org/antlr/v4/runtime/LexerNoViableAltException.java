@@ -14,21 +14,21 @@ import java.util.Locale;
 
 public class LexerNoViableAltException extends RecognitionException {
 	/** Matching attempted at what input index? */
-	private final int startIndex;
+	private final long startIndex;
 
 	/** Which configurations did we try at input.index() that couldn't match input.LA(1)? */
 	private final ATNConfigSet deadEndConfigs;
 
 	public LexerNoViableAltException(Lexer lexer,
 									 CharStream input,
-									 int startIndex,
+									 long startIndex,
 									 ATNConfigSet deadEndConfigs) {
 		super(lexer, input, null);
 		this.startIndex = startIndex;
 		this.deadEndConfigs = deadEndConfigs;
 	}
 
-	public int getStartIndex() {
+	public long getStartIndex() {
 		return startIndex;
 	}
 

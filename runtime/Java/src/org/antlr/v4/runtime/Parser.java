@@ -536,7 +536,7 @@ public abstract class Parser extends Recognizer<Token, ParserATNSimulator> {
 	{
 		_syntaxErrors++;
 		int line = -1;
-		int charPositionInLine = -1;
+		long charPositionInLine = -1;
 		line = offendingToken.getLine();
 		charPositionInLine = offendingToken.getCharPositionInLine();
 

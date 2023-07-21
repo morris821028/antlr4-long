@@ -21,8 +21,8 @@ public class ProfilingATNSimulator extends ParserATNSimulator {
 	protected final DecisionInfo[] decisions;
 	protected int numDecisions;
 
-	protected int _sllStopIndex;
-	protected int _llStopIndex;
+	protected long _sllStopIndex;
+	protected long _llStopIndex;
 
 	protected int currentDecision;
 	protected DFAState currentState;
@@ -59,12 +59,12 @@ public class ProfilingATNSimulator extends ParserATNSimulator {
 			this._llStopIndex = -1;
 			this.currentDecision = decision;
 			long start = System.nanoTime(); // expensive but useful info
-			int alt = super.adaptivePredict(input, decision, outerContext);
+			long alt = super.adaptivePredict(input, decision, outerContext);
 			long stop = System.nanoTime();
 			decisions[decision].timeInPrediction += (stop-start);
 			decisions[decision].invocations++;
 
-			int SLL_k = _sllStopIndex - _startIndex + 1;
+			long SLL_k = _sllStopIndex - _startIndex + 1;
 			decisions[decision].SLL_TotalLook += SLL_k;
 			decisions[decision].SLL_MinLook = decisions[decision].SLL_MinLook==0 ? SLL_k : Math.min(decisions[decision].SLL_MinLook, SLL_k);
 			if ( SLL_k > decisions[decision].SLL_MaxLook ) {
@@ -74,7 +74,7 @@ public class ProfilingATNSimulator extends ParserATNSimulator {
 			}
 
 			if (_llStopIndex >= 0) {
-				int LL_k = _llStopIndex - _startIndex + 1;
+				long LL_k = _llStopIndex - _startIndex + 1;
 				decisions[decision].LL_TotalLook += LL_k;
 				decisions[decision].LL_MinLook = decisions[decision].LL_MinLook==0 ? LL_k : Math.min(decisions[decision].LL_MinLook, LL_k);
 				if ( LL_k > decisions[decision].LL_MaxLook ) {
@@ -84,7 +84,7 @@ public class ProfilingATNSimulator extends ParserATNSimulator {
 				}
 			}
 
-			return alt;
+			return (int) alt;
 		}
 		finally {
 			this.currentDecision = -1;
@@ -156,7 +156,7 @@ public class ProfilingATNSimulator extends ParserATNSimulator {
 		boolean result = super.evalSemanticContext(pred, parserCallStack, alt, fullCtx);
 		if (!(pred instanceof SemanticContext.PrecedencePredicate)) {
 			boolean fullContext = _llStopIndex >= 0;
-			int stopIndex = fullContext ? _llStopIndex : _sllStopIndex;
+			long stopIndex = fullContext ? _llStopIndex : _sllStopIndex;
 			decisions[currentDecision].predicateEvals.add(
 				new PredicateEvalInfo(currentDecision, _input, _startIndex, stopIndex, pred, result, alt, fullCtx)
 			);
@@ -166,7 +166,7 @@ public class ProfilingATNSimulator extends ParserATNSimulator {
 	}
 
 	@Override
-	protected void reportAttemptingFullContext(DFA dfa, BitSet conflictingAlts, ATNConfigSet configs, int startIndex, int stopIndex) {
+	protected void reportAttemptingFullContext(DFA dfa, BitSet conflictingAlts, ATNConfigSet configs, long startIndex, long stopIndex) {
 		if ( conflictingAlts!=null ) {
 			conflictingAltResolvedBySLL = conflictingAlts.nextSetBit(0);
 		}
@@ -178,7 +178,7 @@ public class ProfilingATNSimulator extends ParserATNSimulator {
 	}
 
 	@Override
-	protected void reportContextSensitivity(DFA dfa, int prediction, ATNConfigSet configs, int startIndex, int stopIndex) {
+	protected void reportContextSensitivity(DFA dfa, int prediction, ATNConfigSet configs, long startIndex, long stopIndex) {
 		if ( prediction != conflictingAltResolvedBySLL ) {
 			decisions[currentDecision].contextSensitivities.add(
 					new ContextSensitivityInfo(currentDecision, configs, _input, startIndex, stopIndex)
@@ -188,7 +188,7 @@ public class ProfilingATNSimulator extends ParserATNSimulator {
 	}
 
 	@Override
-	protected void reportAmbiguity(DFA dfa, DFAState D, int startIndex, int stopIndex, boolean exact,
+	protected void reportAmbiguity(DFA dfa, DFAState D, long startIndex, long stopIndex, boolean exact,
 								   BitSet ambigAlts, ATNConfigSet configs)
 	{
 		int prediction;

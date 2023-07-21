@@ -20,7 +20,7 @@ public class LookaheadEventInfo extends DecisionEventInfo {
 	 *  user-level alts that differ from the rewritten rule with a (...) block
 	 *  and a (..)* loop.
 	 */
-	public int predictedAlt;
+	public long predictedAlt;
 
 	/**
 	 * Constructs a new instance of the {@link LookaheadEventInfo} class with
@@ -39,8 +39,8 @@ public class LookaheadEventInfo extends DecisionEventInfo {
 	 */
 	public LookaheadEventInfo(int decision,
 							  ATNConfigSet configs,
-							  int predictedAlt,
-							  TokenStream input, int startIndex, int stopIndex,
+							  long predictedAlt,
+							  TokenStream input, long startIndex, long stopIndex,
 							  boolean fullCtx)
 	{
 		super(decision, configs, input, startIndex, stopIndex, fullCtx);

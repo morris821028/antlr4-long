@@ -100,7 +100,7 @@ public class IntervalSet implements IntSet {
      *  If this is {1..5, 10..20}, adding 6..7 yields
      *  {1..5, 6..7, 10..20}.  Adding 4..8 yields {1..8, 10..20}.
      */
-    public void add(int a, int b) {
+    public void add(long a, long b) {
         add(Interval.of(a, b));
     }
 
@@ -391,11 +391,11 @@ public class IntervalSet implements IntSet {
 		while (l <= r) {
 			int m = (l + r) / 2;
 			Interval I = intervals.get(m);
-			int a = I.a;
-			int b = I.b;
-			if ( b<el ) {
+			long a = I.a;
+			long b = I.b;
+			if (b < el) {
 				l = m + 1;
-			} else if ( a>el ) {
+			} else if (a > el) {
 				r = m - 1;
 			} else { // el >= a && el <= b
 				return true;
@@ -416,7 +416,7 @@ public class IntervalSet implements IntSet {
 	 * @return the maximum value contained in the set.
 	 * @throws RuntimeException if set is empty
 	 */
-	public int getMaxElement() {
+	public long getMaxElement() {
 		if ( isNil() ) {
 			throw new RuntimeException("set is empty");
 		}
@@ -430,7 +430,7 @@ public class IntervalSet implements IntSet {
 	 * @return the minimum value contained in the set.
 	 * @throws RuntimeException if set is empty
 	 */
-	public int getMinElement() {
+	public long getMinElement() {
 		if ( isNil() ) {
 			throw new RuntimeException("set is empty");
 		}
@@ -483,18 +483,22 @@ public class IntervalSet implements IntSet {
 		Iterator<Interval> iter = this.intervals.iterator();
 		while (iter.hasNext()) {
 			Interval I = iter.next();
-			int a = I.a;
-			int b = I.b;
+			long a = I.a;
+			long b = I.b;
 			if ( a==b ) {
-				if ( a==Token.EOF ) buf.append("<EOF>");
-				else if ( elemAreChar ) buf.append("'").appendCodePoint(a).append("'");
-				else buf.append(a);
+				if (a == Token.EOF)
+					buf.append("<EOF>");
+				else if (elemAreChar)
+					buf.append("'").appendCodePoint((int) a).append("'");
+				else
+					buf.append(a);
+			} else {
+				if (elemAreChar)
+					buf.append("'").appendCodePoint((int) a).append("'..'").appendCodePoint((int) b).append("'");
+				else
+					buf.append(a).append("..").append(b);
 			}
-			else {
-				if ( elemAreChar ) buf.append("'").appendCodePoint(a).append("'..'").appendCodePoint(b).append("'");
-				else buf.append(a).append("..").append(b);
-			}
-			if ( iter.hasNext() ) {
+			if (iter.hasNext()) {
 				buf.append(", ");
 			}
 		}
@@ -523,18 +527,18 @@ public class IntervalSet implements IntSet {
 		Iterator<Interval> iter = this.intervals.iterator();
 		while (iter.hasNext()) {
 			Interval I = iter.next();
-			int a = I.a;
-			int b = I.b;
-			if ( a==b ) {
+			long a = I.a;
+			long b = I.b;
+			if (a == b) {
 				buf.append(elementName(vocabulary, a));
-			}
-			else {
-				for (int i=a; i<=b; i++) {
-					if ( i>a ) buf.append(", ");
-                    buf.append(elementName(vocabulary, i));
+			} else {
+				for (long i = a; i <= b; i++) {
+					if (i > a)
+						buf.append(", ");
+					buf.append(elementName(vocabulary, i));
 				}
 			}
-			if ( iter.hasNext() ) {
+			if (iter.hasNext()) {
 				buf.append(", ");
 			}
 		}
@@ -545,7 +549,7 @@ public class IntervalSet implements IntSet {
     }
 
 	/**
-	 * @deprecated Use {@link #elementName(Vocabulary, int)} instead.
+	 * @deprecated Use {@link #elementName(Vocabulary, long)} instead.
 	 */
 	@Deprecated
 	protected String elementName(String[] tokenNames, int a) {
@@ -553,7 +557,7 @@ public class IntervalSet implements IntSet {
 	}
 
 
-	protected String elementName(Vocabulary vocabulary, int a) {
+	protected String elementName(Vocabulary vocabulary, long a) {
 		if (a == Token.EOF) {
 			return "<EOF>";
 		}
@@ -561,21 +565,21 @@ public class IntervalSet implements IntSet {
 			return "<EPSILON>";
 		}
 		else {
-			return vocabulary.getDisplayName(a);
+			return vocabulary.getDisplayName((int) a);
 		}
 	}
 
-    @Override
+	@Override
     public int size() {
 		int n = 0;
 		int numIntervals = intervals.size();
-		if ( numIntervals==1 ) {
+		if (numIntervals == 1) {
 			Interval firstInterval = this.intervals.get(0);
-			return firstInterval.b-firstInterval.a+1;
+			return (int) (firstInterval.b - firstInterval.a + 1);
 		}
 		for (int i = 0; i < numIntervals; i++) {
 			Interval I = intervals.get(i);
-			n += (I.b-I.a+1);
+			n += (I.b - I.a + 1);
 		}
 		return n;
     }
@@ -585,8 +589,8 @@ public class IntervalSet implements IntSet {
 		int n = intervals.size();
 		for (int i = 0; i < n; i++) {
 			Interval I = intervals.get(i);
-			int a = I.a;
-			int b = I.b;
+			int a = (int)I.a;
+			int b = (int)I.b;
 			for (int v=a; v<=b; v++) {
 				values.add(v);
 			}
@@ -596,13 +600,13 @@ public class IntervalSet implements IntSet {
 
     @Override
     public List<Integer> toList() {
-		List<Integer> values = new ArrayList<Integer>();
+		List<Integer> values = new ArrayList<>();
 		int n = intervals.size();
 		for (int i = 0; i < n; i++) {
 			Interval I = intervals.get(i);
-			int a = I.a;
-			int b = I.b;
-			for (int v=a; v<=b; v++) {
+			int a = (int)I.a;
+			int b = (int)I.b;
+			for (int v = a; v <= b; v++) {
 				values.add(v);
 			}
 		}
@@ -610,11 +614,11 @@ public class IntervalSet implements IntSet {
 	}
 
 	public Set<Integer> toSet() {
-		Set<Integer> s = new HashSet<Integer>();
+		Set<Integer> s = new HashSet<>();
 		for (Interval I : intervals) {
-			int a = I.a;
-			int b = I.b;
-			for (int v=a; v<=b; v++) {
+			int a = (int) I.a;
+			int b = (int) I.b;
+			for (int v = a; v <= b; v++) {
 				s.add(v);
 			}
 		}
@@ -630,10 +634,10 @@ public class IntervalSet implements IntSet {
 		int index = 0;
 		for (int j = 0; j < n; j++) {
 			Interval I = intervals.get(j);
-			int a = I.a;
-			int b = I.b;
-			for (int v=a; v<=b; v++) {
-				if ( index==i ) {
+			int a = (int) I.a;
+			int b = (int) I.b;
+			for (int v = a; v <= b; v++) {
+				if (index == i) {
 					return v;
 				}
 				index++;
@@ -652,8 +656,8 @@ public class IntervalSet implements IntSet {
         int n = intervals.size();
         for (int i = 0; i < n; i++) {
             Interval I = intervals.get(i);
-            int a = I.a;
-            int b = I.b;
+            int a = (int)I.a;
+            int b = (int)I.b;
             if ( el<a ) {
                 break; // list is sorted and el is before this interval; not here
             }
@@ -674,7 +678,7 @@ public class IntervalSet implements IntSet {
             }
             // if in middle a..x..b, split interval
             if ( el>a && el<b ) { // found in this interval
-                int oldb = I.b;
+                int oldb = (int)I.b;
                 I.b = el-1;      // [a..x-1]
                 add(el+1, oldb); // add [x+1..b]
             }
